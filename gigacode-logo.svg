@@ -1,0 +1,37 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="55" fill="url(#logoGradient)" stroke="#fff" stroke-width="2"/>
+  
+  <!-- Code brackets -->
+  <text x="60" y="45" text-anchor="middle" font-family="monospace" font-size="24" font-weight="bold" fill="#fff" filter="url(#glow)">{</text>
+  <text x="60" y="75" text-anchor="middle" font-family="monospace" font-size="24" font-weight="bold" fill="#fff" filter="url(#glow)">}</text>
+  
+  <!-- Giga text -->
+  <text x="60" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#fff">GIGA</text>
+  
+  <!-- Code lines -->
+  <line x1="35" y1="55" x2="45" y2="55" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="35" y1="65" x2="50" y2="65" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="75" y1="55" x2="85" y2="55" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="70" y1="65" x2="85" y2="65" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  
+  <!-- Decorative dots -->
+  <circle cx="30" cy="40" r="2" fill="#fff" opacity="0.6"/>
+  <circle cx="90" cy="40" r="2" fill="#fff" opacity="0.6"/>
+  <circle cx="30" cy="80" r="2" fill="#fff" opacity="0.6"/>
+  <circle cx="90" cy="80" r="2" fill="#fff" opacity="0.6"/>
+</svg>

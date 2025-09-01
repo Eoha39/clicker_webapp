@@ -1,0 +1,32 @@
+{
+  "name": "gigacode-clicker",
+  "version": "1.0.0",
+  "description": "Увлекательная игра-кликер для Telegram Web App с логотипом GigaCode",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "telegram",
+    "webapp",
+    "clicker",
+    "game",
+    "gigacode",
+    "idle",
+    "incremental"
+  ],
+  "author": "GigaCode Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eoha39/clicker_webapp/gigacode-clicker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Eoha39/clicker_webapp/gigacode-clicker/issues"
+  },
+  "homepage": "https://github.com/Eoha39/clicker_webapp/gigacode-clicker#readme"
+}
