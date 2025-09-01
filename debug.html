@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigaCode Clicker - Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-info { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>GigaCode Clicker - Debug Mode</h1>
+    
+    <div class="debug-info">
+        <h3>Отладочная информация:</h3>
+        <div id="debug-output">Загрузка...</div>
+    </div>
+    
+    <div class="debug-info">
+        <h3>Элементы страницы:</h3>
+        <div id="elements-check">Проверка элементов...</div>
+    </div>
+    
+    <div class="debug-info">
+        <h3>Состояние игры:</h3>
+        <div id="game-state">Загрузка состояния...</div>
+    </div>
+    
+    <button onclick="testGame()" style="background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 0;">
+        Тестировать игру
+    </button>
+    
+    <button onclick="resetGame()" style="background: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 0;">
+        Сбросить игру
+    </button>
+    
+    <script>
+        // Простая версия игры для отладки
+        let gameState = {
+            coins: 0,
+            coinsPerClick: 1,
+            coinsPerSecond: 0,
+            upgrades: {
+                autoClicker: { level: 0, cost: 10, baseCost: 10, multiplier: 1.15, cps: 0.1 },
+                megaClicker: { level: 0, cost: 50, baseCost: 50, multiplier: 1.15, cps: 0.5 },
+                gigaClicker: { level: 0, cost: 200, baseCost: 200, multiplier: 1.15, cps: 2 },
+                teraClicker: { level: 0, cost: 1000, baseCost: 1000, multiplier: 1.15, cps: 10 },
+                petaClicker: { level: 0, cost: 5000, baseCost: 5000, multiplier: 1.15, cps: 50 },
+                clickMultiplier: { level: 0, cost: 100, baseCost: 100, multiplier: 1.15, effect: 1 }
+            }
+        };
+        
+        function checkElements() {
+            const elements = ['coins', 'cps', 'upgrades-grid', 'achievements-grid'];
+            let output = '';
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    output += `<div class="success">✓ Элемент "${id}" найден</div>`;
+                } else {
+                    output += `<div class="error">✗ Элемент "${id}" НЕ найден</div>`;
+                }
+            });
+            
+            document.getElementById('elements-check').innerHTML = output;
+        }
+        
+        function updateGameState() {
+            const saved = localStorage.getItem('gigaCodeClicker');
+            let output = '<div class="success">Состояние игры загружено</div>';
+            
+            if (saved) {
+                try {
+                    const loaded = JSON.parse(saved);
+                    gameState = { ...gameState, ...loaded };
+                    output += `<div>Монеты: ${gameState.coins}</div>`;
+                    output += `<div>Монет за клик: ${gameState.coinsPerClick}</div>`;
+                    output += `<div>Монет в секунду: ${gameState.coinsPerSecond}</div>`;
+                    output += `<div>Улучшений: ${Object.values(gameState.upgrades).reduce((sum, u) => sum + u.level, 0)}</div>`;
+                } catch (e) {
+                    output = `<div class="error">Ошибка загрузки: ${e.message}</div>`;
+                }
+            } else {
+                output += '<div>Нет сохраненной игры</div>';
+            }
+            
+            document.getElementById('game-state').innerHTML = output;
+        }
+        
+        function testGame() {
+            document.getElementById('debug-output').innerHTML = '<div class="success">Тестирование игры...</div>';
+            
+            // Симулируем клик
+            gameState.coins += gameState.coinsPerClick;
+            localStorage.setItem('gigaCodeClicker', JSON.stringify(gameState));
+            
+            updateGameState();
+            document.getElementById('debug-output').innerHTML = '<div class="success">Клик обработан! Монеты: ' + gameState.coins + '</div>';
+        }
+        
+        function resetGame() {
+            if (confirm('Сбросить игру?')) {
+                localStorage.removeItem('gigaCodeClicker');
+                gameState = {
+                    coins: 0,
+                    coinsPerClick: 1,
+                    coinsPerSecond: 0,
+                    upgrades: {
+                        autoClicker: { level: 0, cost: 10, baseCost: 10, multiplier: 1.15, cps: 0.1 },
+                        megaClicker: { level: 0, cost: 50, baseCost: 50, multiplier: 1.15, cps: 0.5 },
+                        gigaClicker: { level: 0, cost: 200, baseCost: 200, multiplier: 1.15, cps: 2 },
+                        teraClicker: { level: 0, cost: 1000, baseCost: 1000, multiplier: 1.15, cps: 10 },
+                        petaClicker: { level: 0, cost: 5000, baseCost: 5000, multiplier: 1.15, cps: 50 },
+                        clickMultiplier: { level: 0, cost: 100, baseCost: 100, multiplier: 1.15, effect: 1 }
+                    }
+                };
+                updateGameState();
+                document.getElementById('debug-output').innerHTML = '<div class="success">Игра сброшена!</div>';
+            }
+        }
+        
+        // Инициализация
+        window.onload = function() {
+            checkElements();
+            updateGameState();
+        };
+    </script>
+</body>
+</html>
