@@ -409,9 +409,26 @@ function initGame() {
             console.error('Logo element not found!');
         }
         
+        // Check all required elements
+        const requiredElements = ['coins', 'cps', 'upgrades-grid', 'achievements-grid'];
+        requiredElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                console.log(`Element ${id} found`);
+            } else {
+                console.error(`Element ${id} NOT found!`);
+            }
+        });
+        
         // Set up game loop
         setInterval(gameLoop, 100);
         console.log('Game loop started');
+        
+        // Force initial UI update
+        setTimeout(() => {
+            console.log('Forcing UI update...');
+            updateUI();
+        }, 100);
         
         // Show welcome message
         if (gameState.coins === 0) {
