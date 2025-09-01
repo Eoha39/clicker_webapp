@@ -180,12 +180,14 @@ function buyUpgrade(upgradeKey) {
 // Update upgrades display
 function updateUpgrades() {
     try {
+        console.log('Updating upgrades...');
         const upgradesGrid = document.getElementById('upgrades-grid');
         if (!upgradesGrid) {
             console.error('Upgrades grid not found!');
             return;
         }
         upgradesGrid.innerHTML = '';
+        console.log('Game state upgrades:', gameState.upgrades);
     
     const upgradeData = {
         autoClicker: { name: 'Автокликер', description: 'Автоматически кликает за вас', icon: '🤖' },
@@ -205,7 +207,7 @@ function updateUpgrades() {
         upgradeElement.className = `upgrade-item ${canAfford ? 'affordable' : 'expensive'}`;
         upgradeElement.onclick = () => buyUpgrade(key);
         
-        const currentEffect = upgradeKey === 'clickMultiplier' 
+        const currentEffect = key === 'clickMultiplier' 
             ? `+${upgrade.effect} за клик` 
             : `+${formatNumber(upgrade.cps * upgrade.level)}/сек`;
             
@@ -395,6 +397,7 @@ function initGame() {
     try {
         console.log('Initializing game...');
         loadGame();
+        console.log('Game loaded, current state:', gameState);
         updateUI();
         
         // Set up click handler
