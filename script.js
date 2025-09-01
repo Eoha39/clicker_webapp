@@ -1,7 +1,17 @@
 // Telegram Web App initialization
-let tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
+let tg = null;
+if (window.Telegram && window.Telegram.WebApp) {
+    tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+} else {
+    // Fallback for browser testing
+    tg = {
+        showAlert: (message) => console.log('Alert:', message),
+        ready: () => console.log('Telegram Web App ready'),
+        expand: () => console.log('Telegram Web App expanded')
+    };
+}
 
 // Game state
 let gameState = {
@@ -73,10 +83,22 @@ function formatNumber(num) {
 
 // Update UI
 function updateUI() {
-    document.getElementById('coins').textContent = formatNumber(gameState.coins);
-    document.getElementById('cps').textContent = formatNumber(gameState.coinsPerSecond);
-    updateUpgrades();
-    updateAchievements();
+    try {
+        const coinsElement = document.getElementById('coins');
+        const cpsElement = document.getElementById('cps');
+        
+        if (coinsElement) {
+            coinsElement.textContent = formatNumber(gameState.coins);
+        }
+        if (cpsElement) {
+            cpsElement.textContent = formatNumber(gameState.coinsPerSecond);
+        }
+        
+        updateUpgrades();
+        updateAchievements();
+    } catch (error) {
+        console.error('Error updating UI:', error);
+    }
 }
 
 // Handle clicking
@@ -157,8 +179,13 @@ function buyUpgrade(upgradeKey) {
 
 // Update upgrades display
 function updateUpgrades() {
-    const upgradesGrid = document.getElementById('upgrades-grid');
-    upgradesGrid.innerHTML = '';
+    try {
+        const upgradesGrid = document.getElementById('upgrades-grid');
+        if (!upgradesGrid) {
+            console.error('Upgrades grid not found!');
+            return;
+        }
+        upgradesGrid.innerHTML = '';
     
     const upgradeData = {
         autoClicker: { name: 'Автокликер', description: 'Автоматически кликает за вас', icon: '🤖' },
@@ -192,6 +219,9 @@ function updateUpgrades() {
         
         upgradesGrid.appendChild(upgradeElement);
     });
+    } catch (error) {
+        console.error('Error updating upgrades:', error);
+    }
 }
 
 // Check achievements
@@ -249,8 +279,13 @@ function getAchievementName(key) {
 
 // Update achievements display
 function updateAchievements() {
-    const achievementsGrid = document.getElementById('achievements-grid');
-    achievementsGrid.innerHTML = '';
+    try {
+        const achievementsGrid = document.getElementById('achievements-grid');
+        if (!achievementsGrid) {
+            console.error('Achievements grid not found!');
+            return;
+        }
+        achievementsGrid.innerHTML = '';
     
     const achievementData = {
         firstClick: { icon: '👆', description: 'Сделайте первый клик' },
@@ -302,6 +337,9 @@ function updateAchievements() {
         
         achievementsGrid.appendChild(achievementElement);
     });
+    } catch (error) {
+        console.error('Error updating achievements:', error);
+    }
 }
 
 // Auto-save and passive income
@@ -354,18 +392,32 @@ function showPassiveIncomeEffect(amount) {
 
 // Initialize game
 function initGame() {
-    loadGame();
-    updateUI();
-    
-    // Set up click handler
-    document.getElementById('clickable-logo').addEventListener('click', handleClick);
-    
-    // Set up game loop
-    setInterval(gameLoop, 100);
-    
-    // Show welcome message
-    if (gameState.coins === 0) {
-        tg.showAlert('Добро пожаловать в GigaCode Clicker! Кликайте по логотипу, чтобы заработать монеты!');
+    try {
+        console.log('Initializing game...');
+        loadGame();
+        updateUI();
+        
+        // Set up click handler
+        const logoElement = document.getElementById('clickable-logo');
+        if (logoElement) {
+            logoElement.addEventListener('click', handleClick);
+            console.log('Click handler attached to logo');
+        } else {
+            console.error('Logo element not found!');
+        }
+        
+        // Set up game loop
+        setInterval(gameLoop, 100);
+        console.log('Game loop started');
+        
+        // Show welcome message
+        if (gameState.coins === 0) {
+            tg.showAlert('Добро пожаловать в GigaCode Clicker! Кликайте по логотипу, чтобы заработать монеты!');
+        }
+        
+        console.log('Game initialized successfully');
+    } catch (error) {
+        console.error('Error initializing game:', error);
     }
 }
 
