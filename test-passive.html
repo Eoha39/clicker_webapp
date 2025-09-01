@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест пассивного дохода</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-panel { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .income-display { font-size: 18px; font-weight: bold; color: #28a745; }
+        button { background: #2196f3; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 5px; cursor: pointer; }
+        .upgrade { background: #4caf50; }
+        .reset { background: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Тест пассивного дохода</h1>
+    
+    <div class="test-panel">
+        <h3>Текущее состояние:</h3>
+        <div>Монеты: <span id="coins">0</span></div>
+        <div>Монет за клик: <span id="click-value">1</span></div>
+        <div>Пассивный доход: <span id="passive-income" class="income-display">0</span> монет/сек</div>
+        <div>Автокликеры: <span id="autoclickers">0</span></div>
+    </div>
+    
+    <div class="test-panel">
+        <h3>Действия:</h3>
+        <button onclick="addCoins()">Добавить 100 монет</button>
+        <button onclick="buyAutoClicker()" class="upgrade">Купить автокликер (10 монет)</button>
+        <button onclick="buyMegaClicker()" class="upgrade">Купить мега-кликер (50 монет)</button>
+        <button onclick="buyClickMultiplier()" class="upgrade">Купить множитель кликов (100 монет)</button>
+        <button onclick="resetTest()" class="reset">Сбросить тест</button>
+    </div>
+    
+    <div class="test-panel">
+        <h3>Лог событий:</h3>
+        <div id="log" style="height: 200px; overflow-y: scroll; background: white; padding: 10px; border: 1px solid #ccc;"></div>
+    </div>
+    
+    <script>
+        let gameState = {
+            coins: 0,
+            coinsPerClick: 1,
+            upgrades: {
+                autoClicker: { level: 0, cost: 10, baseCost: 10, multiplier: 1.15, cps: 0.1 },
+                megaClicker: { level: 0, cost: 50, baseCost: 50, multiplier: 1.15, cps: 0.5 },
+                clickMultiplier: { level: 0, cost: 100, baseCost: 100, multiplier: 1.15, effect: 1 }
+            }
+        };
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${time}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateDisplay() {
+            document.getElementById('coins').textContent = Math.floor(gameState.coins);
+            document.getElementById('click-value').textContent = gameState.coinsPerClick;
+            
+            // Calculate passive income
+            let passiveIncome = 0;
+            Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+                if (key !== 'clickMultiplier' && upgrade.cps) {
+                    passiveIncome += upgrade.cps * upgrade.level;
+                }
+            });
+            document.getElementById('passive-income').textContent = passiveIncome.toFixed(1);
+            
+            // Count autoclickers
+            let autoclickers = 0;
+            Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+                if (key !== 'clickMultiplier' && upgrade.cps) {
+                    autoclickers += upgrade.level;
+                }
+            });
+            document.getElementById('autoclickers').textContent = autoclickers;
+        }
+        
+        function addCoins() {
+            gameState.coins += 100;
+            log(`Добавлено 100 монет. Всего: ${Math.floor(gameState.coins)}`);
+            updateDisplay();
+        }
+        
+        function buyAutoClicker() {
+            const upgrade = gameState.upgrades.autoClicker;
+            if (gameState.coins >= upgrade.cost) {
+                gameState.coins -= upgrade.cost;
+                upgrade.level++;
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.level));
+                log(`Куплен автокликер! Уровень: ${upgrade.level}, доход: +${upgrade.cps * upgrade.level}/сек`);
+                updateDisplay();
+            } else {
+                log(`Недостаточно монет для автокликера! Нужно: ${upgrade.cost}`);
+            }
+        }
+        
+        function buyMegaClicker() {
+            const upgrade = gameState.upgrades.megaClicker;
+            if (gameState.coins >= upgrade.cost) {
+                gameState.coins -= upgrade.cost;
+                upgrade.level++;
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.level));
+                log(`Куплен мега-кликер! Уровень: ${upgrade.level}, доход: +${upgrade.cps * upgrade.level}/сек`);
+                updateDisplay();
+            } else {
+                log(`Недостаточно монет для мега-кликера! Нужно: ${upgrade.cost}`);
+            }
+        }
+        
+        function buyClickMultiplier() {
+            const upgrade = gameState.upgrades.clickMultiplier;
+            if (gameState.coins >= upgrade.cost) {
+                gameState.coins -= upgrade.cost;
+                upgrade.level++;
+                upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.level));
+                gameState.coinsPerClick = 1 + (upgrade.level * upgrade.effect);
+                log(`Куплен множитель кликов! Уровень: ${upgrade.level}, монет за клик: ${gameState.coinsPerClick}`);
+                updateDisplay();
+            } else {
+                log(`Недостаточно монет для множителя кликов! Нужно: ${upgrade.cost}`);
+            }
+        }
+        
+        function resetTest() {
+            gameState = {
+                coins: 0,
+                coinsPerClick: 1,
+                upgrades: {
+                    autoClicker: { level: 0, cost: 10, baseCost: 10, multiplier: 1.15, cps: 0.1 },
+                    megaClicker: { level: 0, cost: 50, baseCost: 50, multiplier: 1.15, cps: 0.5 },
+                    clickMultiplier: { level: 0, cost: 100, baseCost: 100, multiplier: 1.15, effect: 1 }
+                }
+            };
+            log('Тест сброшен');
+            updateDisplay();
+        }
+        
+        // Game loop for passive income
+        function gameLoop() {
+            let totalPassiveIncome = 0;
+            Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+                if (key !== 'clickMultiplier' && upgrade.cps) {
+                    totalPassiveIncome += upgrade.cps * upgrade.level;
+                }
+            });
+            
+            const passiveIncome = totalPassiveIncome / 10; // 10 times per second
+            gameState.coins += passiveIncome;
+            
+            // Log significant passive income
+            if (passiveIncome > 0.01) {
+                log(`Пассивный доход: +${passiveIncome.toFixed(3)} монет`);
+            }
+        }
+        
+        // Initialize
+        updateDisplay();
+        log('Тест пассивного дохода запущен');
+        
+        // Start game loop
+        setInterval(gameLoop, 100);
+    </script>
+</body>
+</html>

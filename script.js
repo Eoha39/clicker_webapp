@@ -43,7 +43,8 @@ let gameState = {
         totalClicks: 0,
         totalUpgrades: 0,
         totalAutoClickers: 0
-    }
+    },
+    frameCount: 0
 };
 
 // Load game state from localStorage
@@ -95,7 +96,14 @@ function updateUI() {
             coinsElement.textContent = formatNumber(gameState.coins);
         }
         if (cpsElement) {
-            cpsElement.textContent = formatNumber(gameState.coinsPerSecond);
+            // Calculate current passive income
+            let totalPassiveIncome = 0;
+            Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+                if (key !== 'clickMultiplier' && key !== 'clickPower' && upgrade.cps) {
+                    totalPassiveIncome += upgrade.cps * upgrade.level;
+                }
+            });
+            cpsElement.textContent = formatNumber(totalPassiveIncome);
         }
         
         updateUpgrades();
@@ -184,7 +192,13 @@ function buyUpgrade(upgradeKey) {
         saveGame();
         
         // Show notification
-        tg.showAlert(`Улучшение куплено! +${upgrade.cps || upgrade.effect} ${upgradeKey === 'clickMultiplier' ? 'за клик' : 'в секунду'}`);
+        let notificationText = '';
+        if (upgradeKey === 'clickMultiplier' || upgradeKey === 'clickPower') {
+            notificationText = `Улучшение куплено! +${upgrade.effect} за клик`;
+        } else {
+            notificationText = `Улучшение куплено! +${upgrade.cps} в секунду`;
+        }
+        tg.showAlert(notificationText);
     }
 }
 
@@ -384,16 +398,27 @@ function gameLoop() {
     const passiveIncome = totalPassiveIncome / 10;
     gameState.coins += passiveIncome;
     
-    // Show passive income effect if there's significant income
-    if (passiveIncome > 0.01) {
+    // Debug logging every 100 frames
+    if (gameState.frameCount % 100 === 0 && totalPassiveIncome > 0) {
+        console.log(`Passive income: ${totalPassiveIncome}/sec, ${passiveIncome}/frame`);
+    }
+    
+    // Show passive income effect if there's any income
+    if (passiveIncome > 0.001) {
         showPassiveIncomeEffect(passiveIncome);
     }
     
-    // Update UI
-    updateUI();
+    // Update UI every 10 frames (once per second) to avoid too frequent updates
+    if (gameState.frameCount % 10 === 0) {
+        updateUI();
+    }
     
-    // Save game
-    saveGame();
+    // Save game every 100 frames (once per 10 seconds)
+    if (gameState.frameCount % 100 === 0) {
+        saveGame();
+    }
+    
+    gameState.frameCount = (gameState.frameCount || 0) + 1;
 }
 
 // Show passive income effect
