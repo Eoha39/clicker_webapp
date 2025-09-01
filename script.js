@@ -41,6 +41,20 @@ function loadGame() {
     if (saved) {
         const loaded = JSON.parse(saved);
         gameState = { ...gameState, ...loaded };
+        
+        // Recalculate coins per second from all upgrades
+        gameState.coinsPerSecond = 0;
+        Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+            if (key !== 'clickMultiplier' && upgrade.cps) {
+                gameState.coinsPerSecond += upgrade.cps * upgrade.level;
+            }
+        });
+        
+        // Recalculate coins per click
+        const clickMultiplier = gameState.upgrades.clickMultiplier;
+        if (clickMultiplier) {
+            gameState.coinsPerClick = 1 + (clickMultiplier.level * clickMultiplier.effect);
+        }
     }
 }
 
@@ -120,7 +134,13 @@ function buyUpgrade(upgradeKey) {
         if (upgradeKey === 'clickMultiplier') {
             gameState.coinsPerClick = 1 + (upgrade.level * upgrade.effect);
         } else {
-            gameState.coinsPerSecond += upgrade.cps;
+            // Recalculate total coins per second from all upgrades
+            gameState.coinsPerSecond = 0;
+            Object.entries(gameState.upgrades).forEach(([key, upg]) => {
+                if (key !== 'clickMultiplier' && upg.cps) {
+                    gameState.coinsPerSecond += upg.cps * upg.level;
+                }
+            });
         }
         
         // Check achievements
@@ -158,10 +178,14 @@ function updateUpgrades() {
         upgradeElement.className = `upgrade-item ${canAfford ? 'affordable' : 'expensive'}`;
         upgradeElement.onclick = () => buyUpgrade(key);
         
+        const currentEffect = upgradeKey === 'clickMultiplier' 
+            ? `+${upgrade.effect} за клик` 
+            : `+${formatNumber(upgrade.cps * upgrade.level)}/сек`;
+            
         upgradeElement.innerHTML = `
             <div class="upgrade-info">
                 <div class="upgrade-name">${data.icon} ${data.name} (${upgrade.level})</div>
-                <div class="upgrade-description">${data.description}</div>
+                <div class="upgrade-description">${data.description} - ${currentEffect}</div>
             </div>
             <div class="upgrade-cost">${formatNumber(cost)} 🪙</div>
         `;
@@ -283,13 +307,49 @@ function updateAchievements() {
 // Auto-save and passive income
 function gameLoop() {
     // Passive income
-    gameState.coins += gameState.coinsPerSecond / 10; // 10 times per second
+    const passiveIncome = gameState.coinsPerSecond / 10; // 10 times per second
+    gameState.coins += passiveIncome;
+    
+    // Show passive income effect if there's significant income
+    if (passiveIncome > 0.1) {
+        showPassiveIncomeEffect(passiveIncome);
+    }
     
     // Update UI
     updateUI();
     
     // Save game
     saveGame();
+}
+
+// Show passive income effect
+function showPassiveIncomeEffect(amount) {
+    // Create a floating text for passive income
+    const passiveText = document.createElement('div');
+    passiveText.className = 'passive-income-text';
+    passiveText.textContent = `+${formatNumber(amount)}`;
+    passiveText.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #28a745;
+        font-weight: bold;
+        font-size: 14px;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 1000;
+        animation: passiveIncomeFloat 2s ease-out;
+    `;
+    
+    document.body.appendChild(passiveText);
+    
+    // Remove element after animation
+    setTimeout(() => {
+        if (passiveText.parentNode) {
+            passiveText.parentNode.removeChild(passiveText);
+        }
+    }, 2000);
 }
 
 // Initialize game
