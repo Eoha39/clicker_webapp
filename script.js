@@ -186,41 +186,55 @@ function updateUpgrades() {
             console.error('Upgrades grid not found!');
             return;
         }
+        
+        // Очищаем контейнер
         upgradesGrid.innerHTML = '';
         console.log('Game state upgrades:', gameState.upgrades);
-    
-    const upgradeData = {
-        autoClicker: { name: 'Автокликер', description: 'Автоматически кликает за вас', icon: '🤖' },
-        megaClicker: { name: 'Мега-кликер', description: 'Мощный автокликер', icon: '⚡' },
-        gigaClicker: { name: 'Гига-кликер', description: 'Очень мощный автокликер', icon: '🚀' },
-        teraClicker: { name: 'Тера-кликер', description: 'Невероятно мощный автокликер', icon: '💎' },
-        petaClicker: { name: 'Пета-кликер', description: 'Легендарный автокликер', icon: '👑' },
-        clickMultiplier: { name: 'Множитель кликов', description: 'Увеличивает монеты за клик', icon: '🎯' }
-    };
-    
-    Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
-        const data = upgradeData[key];
-        const cost = calculateUpgradeCost(upgrade);
-        const canAfford = gameState.coins >= cost;
         
-        const upgradeElement = document.createElement('div');
-        upgradeElement.className = `upgrade-item ${canAfford ? 'affordable' : 'expensive'}`;
-        upgradeElement.onclick = () => buyUpgrade(key);
+        // Простая версия - создаем базовые улучшения
+        const upgrades = [
+            { key: 'autoClicker', name: 'Автокликер', description: 'Автоматически кликает за вас', icon: '🤖' },
+            { key: 'megaClicker', name: 'Мега-кликер', description: 'Мощный автокликер', icon: '⚡' },
+            { key: 'gigaClicker', name: 'Гига-кликер', description: 'Очень мощный автокликер', icon: '🚀' },
+            { key: 'teraClicker', name: 'Тера-кликер', description: 'Невероятно мощный автокликер', icon: '💎' },
+            { key: 'petaClicker', name: 'Пета-кликер', description: 'Легендарный автокликер', icon: '👑' },
+            { key: 'clickMultiplier', name: 'Множитель кликов', description: 'Увеличивает монеты за клик', icon: '🎯' }
+        ];
         
-        const currentEffect = key === 'clickMultiplier' 
-            ? `+${upgrade.effect} за клик` 
-            : `+${formatNumber(upgrade.cps * upgrade.level)}/сек`;
+        upgrades.forEach(upgradeInfo => {
+            const upgrade = gameState.upgrades[upgradeInfo.key];
+            if (!upgrade) {
+                console.error(`Upgrade ${upgradeInfo.key} not found in gameState`);
+                return;
+            }
             
-        upgradeElement.innerHTML = `
-            <div class="upgrade-info">
-                <div class="upgrade-name">${data.icon} ${data.name} (${upgrade.level})</div>
-                <div class="upgrade-description">${data.description} - ${currentEffect}</div>
-            </div>
-            <div class="upgrade-cost">${formatNumber(cost)} 🪙</div>
-        `;
+            const cost = calculateUpgradeCost(upgrade);
+            const canAfford = gameState.coins >= cost;
+            
+            const upgradeElement = document.createElement('div');
+            upgradeElement.className = `upgrade-item ${canAfford ? 'affordable' : 'expensive'}`;
+            upgradeElement.onclick = () => buyUpgrade(upgradeInfo.key);
+            
+            let currentEffect = '';
+            if (upgradeInfo.key === 'clickMultiplier') {
+                currentEffect = `+${upgrade.effect} за клик`;
+            } else {
+                currentEffect = `+${formatNumber(upgrade.cps * upgrade.level)}/сек`;
+            }
+            
+            upgradeElement.innerHTML = `
+                <div class="upgrade-info">
+                    <div class="upgrade-name">${upgradeInfo.icon} ${upgradeInfo.name} (${upgrade.level})</div>
+                    <div class="upgrade-description">${upgradeInfo.description} - ${currentEffect}</div>
+                </div>
+                <div class="upgrade-cost">${formatNumber(cost)} 🪙</div>
+            `;
+            
+            upgradesGrid.appendChild(upgradeElement);
+            console.log(`Added upgrade: ${upgradeInfo.name}`);
+        });
         
-        upgradesGrid.appendChild(upgradeElement);
-    });
+        console.log('Upgrades updated successfully');
     } catch (error) {
         console.error('Error updating upgrades:', error);
     }
