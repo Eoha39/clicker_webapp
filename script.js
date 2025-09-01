@@ -24,7 +24,8 @@ let gameState = {
         gigaClicker: { level: 0, cost: 200, baseCost: 200, multiplier: 1.15, cps: 2 },
         teraClicker: { level: 0, cost: 1000, baseCost: 1000, multiplier: 1.15, cps: 10 },
         petaClicker: { level: 0, cost: 5000, baseCost: 5000, multiplier: 1.15, cps: 50 },
-        clickMultiplier: { level: 0, cost: 100, baseCost: 100, multiplier: 1.15, effect: 1 }
+        clickMultiplier: { level: 0, cost: 100, baseCost: 100, multiplier: 1.15, effect: 1 },
+        clickPower: { level: 0, cost: 75, baseCost: 75, multiplier: 1.15, effect: 2 }
     },
     achievements: {
         firstClick: { unlocked: false, requirement: 1, type: 'clicks' },
@@ -60,11 +61,14 @@ function loadGame() {
             }
         });
         
-        // Recalculate coins per click
-        const clickMultiplier = gameState.upgrades.clickMultiplier;
-        if (clickMultiplier) {
-            gameState.coinsPerClick = 1 + (clickMultiplier.level * clickMultiplier.effect);
-        }
+        // Recalculate coins per click from all click upgrades
+        let totalClickBonus = 1;
+        Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+            if (key === 'clickMultiplier' || key === 'clickPower') {
+                totalClickBonus += upgrade.effect * upgrade.level;
+            }
+        });
+        gameState.coinsPerClick = totalClickBonus;
     }
 }
 
@@ -153,13 +157,20 @@ function buyUpgrade(upgradeKey) {
         gameState.stats.totalUpgrades++;
         
         // Apply upgrade effects
-        if (upgradeKey === 'clickMultiplier') {
-            gameState.coinsPerClick = 1 + (upgrade.level * upgrade.effect);
+        if (upgradeKey === 'clickMultiplier' || upgradeKey === 'clickPower') {
+            // Recalculate total coins per click from all click upgrades
+            let totalClickBonus = 1;
+            Object.entries(gameState.upgrades).forEach(([key, upg]) => {
+                if (key === 'clickMultiplier' || key === 'clickPower') {
+                    totalClickBonus += upg.effect * upg.level;
+                }
+            });
+            gameState.coinsPerClick = totalClickBonus;
         } else {
-            // Recalculate total coins per second from all upgrades
+            // Recalculate total coins per second from all autoclicker upgrades
             gameState.coinsPerSecond = 0;
             Object.entries(gameState.upgrades).forEach(([key, upg]) => {
-                if (key !== 'clickMultiplier' && upg.cps) {
+                if (key !== 'clickMultiplier' && key !== 'clickPower' && upg.cps) {
                     gameState.coinsPerSecond += upg.cps * upg.level;
                 }
             });
@@ -198,7 +209,8 @@ function updateUpgrades() {
             { key: 'gigaClicker', name: 'Гига-кликер', description: 'Очень мощный автокликер', icon: '🚀' },
             { key: 'teraClicker', name: 'Тера-кликер', description: 'Невероятно мощный автокликер', icon: '💎' },
             { key: 'petaClicker', name: 'Пета-кликер', description: 'Легендарный автокликер', icon: '👑' },
-            { key: 'clickMultiplier', name: 'Множитель кликов', description: 'Увеличивает монеты за клик', icon: '🎯' }
+            { key: 'clickMultiplier', name: 'Множитель кликов', description: 'Увеличивает монеты за клик', icon: '🎯' },
+            { key: 'clickPower', name: 'Сила клика', description: 'Значительно увеличивает монеты за клик', icon: '💪' }
         ];
         
         upgrades.forEach(upgradeInfo => {
@@ -216,7 +228,7 @@ function updateUpgrades() {
             upgradeElement.onclick = () => buyUpgrade(upgradeInfo.key);
             
             let currentEffect = '';
-            if (upgradeInfo.key === 'clickMultiplier') {
+            if (upgradeInfo.key === 'clickMultiplier' || upgradeInfo.key === 'clickPower') {
                 currentEffect = `+${upgrade.effect} за клик`;
             } else {
                 currentEffect = `+${formatNumber(upgrade.cps * upgrade.level)}/сек`;
@@ -360,12 +372,20 @@ function updateAchievements() {
 
 // Auto-save and passive income
 function gameLoop() {
-    // Passive income
-    const passiveIncome = gameState.coinsPerSecond / 10; // 10 times per second
+    // Calculate passive income from all autoclickers
+    let totalPassiveIncome = 0;
+    Object.entries(gameState.upgrades).forEach(([key, upgrade]) => {
+        if (key !== 'clickMultiplier' && key !== 'clickPower' && upgrade.cps) {
+            totalPassiveIncome += upgrade.cps * upgrade.level;
+        }
+    });
+    
+    // Apply passive income (10 times per second)
+    const passiveIncome = totalPassiveIncome / 10;
     gameState.coins += passiveIncome;
     
     // Show passive income effect if there's significant income
-    if (passiveIncome > 0.1) {
+    if (passiveIncome > 0.01) {
         showPassiveIncomeEffect(passiveIncome);
     }
     
