@@ -430,3 +430,11 @@ document.addEventListener('visibilitychange', () => {
         saveGame();
     }
 });
+
+// Reset game function for testing
+function resetGame() {
+    if (confirm('Вы уверены, что хотите сбросить игру? Все прогресс будет потерян!')) {
+        localStorage.removeItem('gigaCodeClicker');
+        location.reload();
+    }
+}

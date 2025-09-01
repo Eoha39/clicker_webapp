@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigaCode Clicker - Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <div class="stats">
+                <div class="coins">
+                    <span class="coin-icon">🪙</span>
+                    <span id="coins">0</span>
+                </div>
+                <div class="coins-per-second">
+                    <span class="cps-icon">⚡</span>
+                    <span id="cps">0</span>/сек
+                </div>
+            </div>
+        </header>
+
+        <main class="game-main">
+            <div class="clicker-area">
+                <div class="logo-container">
+                    <img src="gigacode-logo.svg" alt="GigaCode" id="clickable-logo" class="clickable-logo">
+                    <div class="click-effect" id="click-effect"></div>
+                </div>
+                <div class="click-text" id="click-text">+1</div>
+            </div>
+        </main>
+
+        <div class="upgrades-section">
+            <h3>Улучшения</h3>
+            <div class="upgrades-grid" id="upgrades-grid">
+                <!-- Upgrades will be generated here -->
+            </div>
+        </div>
+
+        <div class="achievements-section">
+            <h3>Достижения</h3>
+            <div class="achievements-grid" id="achievements-grid">
+                <!-- Achievements will be generated here -->
+            </div>
+        </div>
+        
+        <div class="debug-section" style="text-align: center; margin-top: 20px;">
+            <button onclick="resetGame()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Сбросить игру</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
