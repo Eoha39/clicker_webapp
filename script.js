@@ -444,6 +444,12 @@ function initGame() {
             updateUI();
         }, 100);
         
+        // Force upgrades update specifically
+        setTimeout(() => {
+            console.log('Forcing upgrades update...');
+            updateUpgrades();
+        }, 200);
+        
         // Show welcome message
         if (gameState.coins === 0) {
             tg.showAlert('Добро пожаловать в GigaCode Clicker! Кликайте по логотипу, чтобы заработать монеты!');
